@@ -6,6 +6,7 @@ kkudaero-server에서 작업하는 코딩 에이전트가 따라야 하는 규�
 
 ## 1. 프로젝트 정보
 
+- 제품 개요와 1단계 기능은 `docs/PRODUCT.md`에 있습니다. 작업 전에 읽습니다.
 - Java 21, Spring Boot 3, Gradle(Kotlin DSL)
 - Spring Web, Spring Data JPA, Spring Validation, Spring Security
 - DB: PostgreSQL, 마이그레이션은 Flyway
