@@ -6,6 +6,7 @@ kkudaero-server에서 작업하는 코딩 에이전트가 따라야 하는 규�
 
 ## 1. 프로젝트 정보
 
+- 제품 개요와 1단계 기능은 `docs/PRODUCT.md`에 있습니다. 작업 전에 읽습니다.
 - Java 21, Spring Boot 3, Gradle(Kotlin DSL)
 - Spring Web, Spring Data JPA, Spring Validation, Spring Security
 - DB: PostgreSQL, 마이그레이션은 Flyway
@@ -261,7 +262,8 @@ public interface UnipassClient {
 | `refactor` | 동작을 바꾸지 않는 구조 개선 |
 | `test` | 테스트 추가·수정 |
 | `hotfix` | 즉시 고쳐야 하는 치명적인 버그 |
-| `chore` | 설정, 의존성, 배포 등 기타 작업 |
+| `setting` | 프로젝트 초기 세팅, 빌드·배포 등 환경 설정 |
+| `chore` | 의존성 업데이트 등 기타 작업 |
 
 새 API를 만드는 작업은 `feat`를 쓰고, 이슈와 PR에 `API` 라벨을 붙입니다.
 
@@ -269,11 +271,13 @@ public interface UnipassClient {
 
 - 이슈를 만든 뒤 이슈 번호에 맞는 브랜치를 만듭니다.
 - 형식: `<유형>/#<이슈번호>-<작업내용>` (예: `feat/#2-duty-calculator`)
+- 작업 내용은 짧은 영문 소문자와 하이픈으로 씁니다.
 - 작업 브랜치에서 `main`으로 PR을 보냅니다. `develop` 브랜치는 쓰지 않습니다.
 
 ### 커밋
 
-- 형식: `<유형>: #<이슈번호> <한글 요약>` (예: `feat: #2 관부가세 예상 계산 API 구현`)
+- 형식: `<유형>: #<이슈번호> <영어 요약>` (예: `feat: #2 add duty estimate calculation API`)
+- 요약은 영어 문장으로 쓰고, 소문자 동사 원형으로 시작하며 마침표를 붙이지 않습니다.
 - 제목은 50자 이내로 씁니다. 필요하면 본문에 자세히 적습니다.
 - 목적이 다른 변경은 커밋을 나눕니다.
 - 빌드나 테스트가 실패하는 상태로 커밋하지 않습니다.
