@@ -15,8 +15,6 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
 springdoc:
   default-consumes-media-type: application/json
@@ -25,3 +23,6 @@ springdoc:
 kkudaero:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:PT1H}

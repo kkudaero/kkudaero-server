@@ -7,3 +7,6 @@ spring:
 kkudaero:
   cors:
     allowed-origins: http://localhost:3000
+  jwt:
+    secret:
+    access-token-ttl: PT1H
