@@ -14,11 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 public final class SellerTestSupport {
 
     public static final String BEARER_PREFIX = "Bearer ";
+    public static final String PASSWORD = "password-1234";
 
     private static final String SELLERS_PATH = "/api/v1/sellers";
     private static final String LOGIN_PATH = "/api/v1/sellers/login";
     private static final String ME_PATH = "/api/v1/sellers/me";
-    private static final String PASSWORD = "password-1234";
 
     private SellerTestSupport() {
     }

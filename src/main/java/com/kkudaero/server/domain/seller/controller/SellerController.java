@@ -4,6 +4,7 @@ import com.kkudaero.server.domain.seller.dto.LoginRequest;
 import com.kkudaero.server.domain.seller.dto.LoginResponse;
 import com.kkudaero.server.domain.seller.dto.SellerResponse;
 import com.kkudaero.server.domain.seller.dto.SignUpRequest;
+import com.kkudaero.server.domain.seller.dto.WithdrawalRequest;
 import com.kkudaero.server.domain.seller.service.SellerService;
 import com.kkudaero.server.global.response.ApiResponse;
 import com.kkudaero.server.global.security.SellerPrincipal;
@@ -48,5 +49,19 @@ public class SellerController {
     @Operation(summary = "내 정보 조회", description = "액세스 토큰의 주인인 셀러 정보를 돌려줍니다.")
     public ApiResponse<SellerResponse> getMe(@AuthenticationPrincipal SellerPrincipal principal) {
         return ApiResponse.success(sellerService.getSeller(principal.sellerId()));
+    }
+
+    @PostMapping("/me/withdrawal")
+    @Operation(
+            summary = "탈퇴",
+            description = "비밀번호를 확인한 뒤 계정과 주문, 알림, 체크리스트 기록을 모두 지웁니다. "
+                    + "되돌릴 수 없고, 이미 받은 토큰은 더 쓸 수 없습니다. 비밀번호가 틀리면 403을 돌려줍니다."
+    )
+    public ApiResponse<Void> deleteSeller(
+            @AuthenticationPrincipal SellerPrincipal principal,
+            @Valid @RequestBody WithdrawalRequest request
+    ) {
+        sellerService.deleteSeller(principal.sellerId(), request.password());
+        return ApiResponse.success();
     }
 }

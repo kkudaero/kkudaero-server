@@ -10,6 +10,7 @@ import com.kkudaero.server.domain.order.entity.OrderStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,4 +33,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("finishedStatuses") Collection<OrderStatus> finishedStatuses,
             @Param("createdFrom") Instant createdFrom
     );
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from Order e where e.sellerId = :sellerId")
+    void deleteAllBySellerId(@Param("sellerId") Long sellerId);
 }

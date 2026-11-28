@@ -27,6 +27,7 @@ class KkudaeroServerApplicationTests {
                 .andExpect(jsonPath("$.info.title").exists())
                 .andExpect(jsonPath("$.security[0].accessToken").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sellers/me'].get.security").doesNotExist())
+                .andExpect(jsonPath("$.paths['/api/v1/sellers/me/withdrawal'].post.summary").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/duty-estimates'].post.summary").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders'].post.summary").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{orderId}/status'].patch.summary").exists())
