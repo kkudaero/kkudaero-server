@@ -28,6 +28,11 @@ class KkudaeroServerApplicationTests {
                 .andExpect(jsonPath("$.security[0].accessToken").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/sellers/me'].get.security").doesNotExist())
                 .andExpect(jsonPath("$.paths['/api/v1/duty-estimates'].post.summary").exists())
+                .andExpect(jsonPath("$.components.schemas.DutyEstimateRequest.properties.usdToKrwRate").exists())
+                .andExpect(jsonPath("$.components.schemas.DutyEstimateRequest.properties.exchangeRatePairValid")
+                        .doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.DutyEstimateRequest.required[?(@ == 'usdToKrwRate')]")
+                        .isEmpty())
                 .andExpect(jsonPath("$.paths['/api/v1/sellers/login'].post.security").isEmpty());
     }
 

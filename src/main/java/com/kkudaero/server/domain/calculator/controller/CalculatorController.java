@@ -25,7 +25,8 @@ public class CalculatorController {
     @Operation(
             summary = "관부가세·마진 예상 계산",
             description = "목록통관 여부와 합산과세 위험, 예상 관부가세와 마진을 계산합니다. "
-                    + "결과는 요청에 담긴 환율과 관세율로 계산한 예상치이며 저장하지 않습니다."
+                    + "환율을 비우면 관세청 과세환율을 쓰고, 계산에 쓴 환율과 기준 시각을 응답에 담습니다. "
+                    + "결과는 예상치이며 저장하지 않습니다."
     )
     public ApiResponse<DutyEstimateResponse> calculateDutyEstimate(@Valid @RequestBody DutyEstimateRequest request) {
         return ApiResponse.success(calculatorService.calculateDutyEstimate(request));

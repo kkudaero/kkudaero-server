@@ -1,11 +1,24 @@
 package com.kkudaero.server.domain.calculator.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 
 import com.kkudaero.server.domain.calculator.dto.DutyEstimateRequest;
 import com.kkudaero.server.domain.calculator.dto.DutyEstimateResponse;
+import com.kkudaero.server.domain.calculator.dto.ExchangeRateSource;
+import com.kkudaero.server.domain.calculator.error.CalculatorErrorCode;
+import com.kkudaero.server.global.error.BusinessException;
+import com.kkudaero.server.infra.exchange.CurrencyCode;
+import com.kkudaero.server.infra.exchange.ExchangeRate;
+import com.kkudaero.server.infra.exchange.ExchangeRateClient;
+import com.kkudaero.server.infra.exchange.ExchangeRateUnavailableException;
 import org.junit.jupiter.api.Test;
 
 class CalculatorServiceTest {
@@ -14,7 +27,11 @@ class CalculatorServiceTest {
     private static final String USD_TO_KRW_RATE = "1000";
     private static final String NO_AMOUNT = "0";
 
-    private final CalculatorService calculatorService = new CalculatorService();
+    private static final LocalDate APPLIED_FROM = LocalDate.of(2026, 11, 22);
+    private static final Instant FETCHED_AT = Instant.parse("2026-11-27T16:00:00Z");
+
+    private final ExchangeRateClient exchangeRateClient = mock(ExchangeRateClient.class);
+    private final CalculatorService calculatorService = new CalculatorService(exchangeRateClient);
 
     @Test
     void 물품가격이_149_99달러면_목록통관이고_세금이_없다() {
@@ -102,6 +119,62 @@ class CalculatorServiceTest {
         assertThat(response.jpyToKrwRate()).isEqualByComparingTo(JPY_TO_KRW_RATE);
         assertThat(response.usdToKrwRate()).isEqualByComparingTo(USD_TO_KRW_RATE);
         assertThat(response.listClearanceLimitUsd()).isEqualByComparingTo(DutyPolicy.LIST_CLEARANCE_LIMIT_USD);
+    }
+
+    @Test
+    void 환율을_직접_넣으면_과세환율을_조회하지_않는다() {
+        DutyEstimateResponse response = estimate("21000", NO_AMOUNT, NO_AMOUNT, false);
+
+        assertThat(response.exchangeRateSource()).isEqualTo(ExchangeRateSource.SELLER_INPUT);
+        assertThat(response.exchangeRateAppliedFrom()).isNull();
+        assertThat(response.exchangeRateFetchedAt()).isNull();
+        verifyNoInteractions(exchangeRateClient);
+    }
+
+    @Test
+    void 환율을_비우면_관세청_과세환율로_계산하고_기준_시각을_돌려준다() {
+        when(exchangeRateClient.getImportRate(CurrencyCode.JPY)).thenReturn(rate(CurrencyCode.JPY, JPY_TO_KRW_RATE));
+        when(exchangeRateClient.getImportRate(CurrencyCode.USD)).thenReturn(rate(CurrencyCode.USD, USD_TO_KRW_RATE));
+
+        DutyEstimateResponse response = calculatorService.calculateDutyEstimate(requestWithoutRates());
+
+        assertThat(response.itemPriceUsd()).isEqualByComparingTo("150.01");
+        assertThat(response.isListClearance()).isFalse();
+        assertThat(response.jpyToKrwRate()).isEqualByComparingTo(JPY_TO_KRW_RATE);
+        assertThat(response.usdToKrwRate()).isEqualByComparingTo(USD_TO_KRW_RATE);
+        assertThat(response.exchangeRateSource()).isEqualTo(ExchangeRateSource.CUSTOMS);
+        assertThat(response.exchangeRateAppliedFrom()).isEqualTo(APPLIED_FROM);
+        assertThat(response.exchangeRateFetchedAt()).isEqualTo(FETCHED_AT);
+    }
+
+    @Test
+    void 과세환율을_조회하지_못하면_환율_조회_실패_오류를_던진다() {
+        when(exchangeRateClient.getImportRate(CurrencyCode.JPY))
+                .thenThrow(new ExchangeRateUnavailableException("조회 실패"));
+
+        assertThatThrownBy(() -> calculatorService.calculateDutyEstimate(requestWithoutRates()))
+                .isInstanceOf(BusinessException.class)
+                .extracting(exception -> ((BusinessException) exception).getErrorCode())
+                .isEqualTo(CalculatorErrorCode.EXCHANGE_RATE_UNAVAILABLE);
+    }
+
+    private ExchangeRate rate(CurrencyCode currency, String krwPerUnit) {
+        return new ExchangeRate(currency, new BigDecimal(krwPerUnit), APPLIED_FROM, FETCHED_AT);
+    }
+
+    private DutyEstimateRequest requestWithoutRates() {
+        return new DutyEstimateRequest(
+                new BigDecimal("15001"),
+                new BigDecimal(NO_AMOUNT),
+                new BigDecimal(NO_AMOUNT),
+                new BigDecimal("10000"),
+                new BigDecimal("8"),
+                null,
+                null,
+                new BigDecimal("300000"),
+                new BigDecimal("5.5"),
+                false
+        );
     }
 
     private DutyEstimateResponse estimate(
