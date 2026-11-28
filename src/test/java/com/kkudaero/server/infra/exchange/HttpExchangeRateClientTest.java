@@ -33,9 +33,9 @@ class HttpExchangeRateClientTest {
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
     private static final String SUCCESS_BODY = """
             <response>
-              <header><resultCode>00</resultCode><resultMsg>정상서비스</resultMsg></header>
+              <header><resultCode>00</resultCode><resultMsg>정상서비스.</resultMsg></header>
               <body><items>
-                <item><currSgn>JPY</currSgn><fxrt>8.3599</fxrt><aplyBgnDt>20261122</aplyBgnDt></item>
+                <item><aplyBgnDt>20261122</aplyBgnDt><currSgn>JPY</currSgn><fxrt>8.3599</fxrt></item>
                 <item><currSgn>USD</currSgn><fxrt>1333.88</fxrt><aplyBgnDt>20261122</aplyBgnDt></item>
                 <item><currSgn>EUR</currSgn><fxrt>1466.2</fxrt><aplyBgnDt>20261122</aplyBgnDt></item>
               </items></body>
@@ -71,6 +71,16 @@ class HttpExchangeRateClientTest {
         assertThat(rate.krwPerUnit()).isEqualByComparingTo("8.3599");
         assertThat(rate.appliedFrom()).isEqualTo(LocalDate.of(2026, 11, 22));
         assertThat(rate.fetchedAt()).isEqualTo(NOW);
+        server.verify();
+    }
+
+    @Test
+    void 인증키_앞뒤의_공백과_줄바꿈은_떼고_보낸다() {
+        server.expect(once(), requestTo(containsString("serviceKey=" + ENCODED_SERVICE_KEY + "&")))
+                .andRespond(withSuccess(SUCCESS_BODY, MediaType.APPLICATION_XML));
+
+        client(" " + SERVICE_KEY + "\n").getImportRate(CurrencyCode.JPY);
+
         server.verify();
     }
 
