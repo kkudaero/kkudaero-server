@@ -41,6 +41,10 @@
 
 `/api/v1/orders`로 주문을 등록·조회·수정·삭제하고 `PATCH /api/v1/orders/{orderId}/status`로 진행 상태를 바꿉니다. 셀러는 자기 주문만 볼 수 있고, 수취인 이름과 개인통관고유부호는 암호화해서 저장합니다. 배경은 [docs/decisions/0005-order-board.md](docs/decisions/0005-order-board.md)에 있습니다.
 
+## 통관 진행 조회
+
+`GET /api/v1/orders/{orderId}/customs-status`는 주문의 국제 운송장번호로 관세청 화물통관 진행정보를 조회합니다. 조회하려면 UNIPASS에서 화물통관진행정보조회 OpenAPI 인증키를 받아 `UNIPASS_API_KEY` 환경변수나 `application-local.yml`의 `kkudaero.unipass.api-key`에 넣습니다. 키가 없으면 503을 돌려줍니다. 배경은 [docs/decisions/0006-customs-status.md](docs/decisions/0006-customs-status.md)에 있습니다.
+
 ## 빌드 확인
 
 ```bash

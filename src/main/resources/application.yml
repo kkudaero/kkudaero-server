@@ -33,3 +33,10 @@ kkudaero:
   jwt:
     secret: ${JWT_SECRET}
     access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:PT1H}
+  unipass:
+    cargo-progress-url: https://unipass.customs.go.kr:38010/ext/rest/cargCsclPrgsInfoQry/retrieveCargCsclPrgsInfo
+    api-key: ${UNIPASS_API_KEY:}
+    connect-timeout: PT3S
+    read-timeout: PT5S
+    cache-ttl: PT10M
+    cache-max-size: 1000
