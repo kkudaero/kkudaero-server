@@ -37,6 +37,10 @@
 
 환율을 비우면 관세청 과세환율을 조회해 씁니다. 조회하려면 공공데이터포털에서 `관세청_관세환율정보(GW)` 활용 신청을 하고, 일반 인증키(Decoding)를 `CUSTOMS_EXCHANGE_SERVICE_KEY` 환경변수나 `application-local.yml`의 `kkudaero.exchange.service-key`에 넣습니다. 키가 없으면 환율을 직접 넣은 요청만 계산됩니다. 배경은 [docs/decisions/0003-customs-exchange-rate.md](docs/decisions/0003-customs-exchange-rate.md)에 있습니다.
 
+## 주문 추적 보드
+
+`/api/v1/orders`로 주문을 등록·조회·수정·삭제하고 `PATCH /api/v1/orders/{orderId}/status`로 진행 상태를 바꿉니다. 셀러는 자기 주문만 볼 수 있고, 수취인 이름과 개인통관고유부호는 암호화해서 저장합니다. 배경은 [docs/decisions/0005-order-board.md](docs/decisions/0005-order-board.md)에 있습니다.
+
 ## 빌드 확인
 
 ```bash
