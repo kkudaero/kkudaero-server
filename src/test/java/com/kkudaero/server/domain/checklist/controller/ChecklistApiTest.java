@@ -2,7 +2,6 @@ package com.kkudaero.server.domain.checklist.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -10,6 +9,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kkudaero.server.global.error.GlobalErrorCode;
+import com.kkudaero.server.support.SellerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ChecklistApiTest {
 
-    private static final String SELLERS_PATH = "/api/v1/sellers";
-    private static final String LOGIN_PATH = "/api/v1/sellers/login";
     private static final String CHECKLIST_STEPS_PATH = "/api/v1/checklist-steps";
     private static final String CHECKLIST_STEP_PATH = "/api/v1/checklist-steps/{step}";
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final String PASSWORD = "password-1234";
     private static final String CUSTOMS_STEP = "CUSTOMS_ECOMMERCE_CODE";
     private static final int STEP_COUNT = 5;
 
@@ -47,7 +43,7 @@ class ChecklistApiTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        accessToken = signUpAndLogin("seller@example.com");
+        accessToken = SellerTestSupport.signUpAndLogin(mockMvc, objectMapper, "seller@example.com");
     }
 
     @Test
@@ -105,7 +101,7 @@ class ChecklistApiTest {
 
     @Test
     void 다른_셀러의_완료_표시는_내_체크리스트에_보이지_않는다() throws Exception {
-        String otherAccessToken = signUpAndLogin("other@example.com");
+        String otherAccessToken = SellerTestSupport.signUpAndLogin(mockMvc, objectMapper, "other@example.com");
         updateStep(otherAccessToken, CUSTOMS_STEP, true).andExpect(status().isOk());
 
         getSteps(accessToken).andExpect(jsonPath("$.data[?(@.isCompleted == true)]").isEmpty());
@@ -116,7 +112,7 @@ class ChecklistApiTest {
     void 없는_단계나_빈_요청은_400을_받는다() throws Exception {
         updateStep(accessToken, "UNKNOWN", true).andExpect(status().isBadRequest());
         mockMvc.perform(patch(CHECKLIST_STEP_PATH, CUSTOMS_STEP)
-                        .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
+                        .header(HttpHeaders.AUTHORIZATION, SellerTestSupport.BEARER_PREFIX + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
@@ -131,26 +127,14 @@ class ChecklistApiTest {
     }
 
     private ResultActions getSteps(String token) throws Exception {
-        return mockMvc.perform(get(CHECKLIST_STEPS_PATH).header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token));
+        return mockMvc.perform(get(CHECKLIST_STEPS_PATH)
+                .header(HttpHeaders.AUTHORIZATION, SellerTestSupport.BEARER_PREFIX + token));
     }
 
     private ResultActions updateStep(String token, String step, boolean isCompleted) throws Exception {
         return mockMvc.perform(patch(CHECKLIST_STEP_PATH, step)
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token)
+                .header(HttpHeaders.AUTHORIZATION, SellerTestSupport.BEARER_PREFIX + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Map.of("isCompleted", isCompleted))));
-    }
-
-    private String signUpAndLogin(String email) throws Exception {
-        String credentials = objectMapper.writeValueAsString(Map.of("email", email, "password", PASSWORD));
-        mockMvc.perform(post(SELLERS_PATH).contentType(MediaType.APPLICATION_JSON).content(credentials))
-                .andExpect(status().isCreated());
-        String loginBody = mockMvc.perform(
-                        post(LOGIN_PATH).contentType(MediaType.APPLICATION_JSON).content(credentials))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        return objectMapper.readTree(loginBody).at("/data/accessToken").asText();
     }
 }

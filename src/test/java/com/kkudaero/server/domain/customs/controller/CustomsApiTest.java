@@ -21,6 +21,7 @@ import com.kkudaero.server.infra.unipass.CargoEvent;
 import com.kkudaero.server.infra.unipass.CargoStatus;
 import com.kkudaero.server.infra.unipass.UnipassClient;
 import com.kkudaero.server.infra.unipass.UnipassUnavailableException;
+import com.kkudaero.server.support.SellerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class CustomsApiTest {
 
-    private static final String SELLERS_PATH = "/api/v1/sellers";
-    private static final String LOGIN_PATH = "/api/v1/sellers/login";
     private static final String ORDERS_PATH = "/api/v1/orders";
     private static final String CUSTOMS_STATUS_PATH = "/api/v1/orders/{orderId}/customs-status";
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final String PASSWORD = "password-1234";
     private static final String TRACKING_NUMBER = "5507410484";
     private static final Instant PROCESSED_AT = Instant.parse("2026-11-28T01:10:09Z");
     private static final Instant FETCHED_AT = Instant.parse("2026-11-28T03:00:00Z");
@@ -63,7 +60,7 @@ class CustomsApiTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        accessToken = signUpAndLogin("seller@example.com");
+        accessToken = SellerTestSupport.signUpAndLogin(mockMvc, objectMapper, "seller@example.com");
     }
 
     @Test
@@ -117,7 +114,7 @@ class CustomsApiTest {
     @Test
     void 다른_셀러의_주문은_조회하지_않고_404를_받는다() throws Exception {
         long orderId = createOrder(accessToken, TRACKING_NUMBER);
-        String otherAccessToken = signUpAndLogin("other@example.com");
+        String otherAccessToken = SellerTestSupport.signUpAndLogin(mockMvc, objectMapper, "other@example.com");
 
         getCustomsStatus(otherAccessToken, orderId)
                 .andExpect(status().isNotFound())
@@ -144,22 +141,8 @@ class CustomsApiTest {
     }
 
     private ResultActions getCustomsStatus(String token, long orderId) throws Exception {
-        return mockMvc.perform(
-                get(CUSTOMS_STATUS_PATH, orderId).header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token)
-        );
-    }
-
-    private String signUpAndLogin(String email) throws Exception {
-        String credentials = objectMapper.writeValueAsString(Map.of("email", email, "password", PASSWORD));
-        mockMvc.perform(post(SELLERS_PATH).contentType(MediaType.APPLICATION_JSON).content(credentials))
-                .andExpect(status().isCreated());
-        String loginBody = mockMvc.perform(
-                        post(LOGIN_PATH).contentType(MediaType.APPLICATION_JSON).content(credentials))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        return objectMapper.readTree(loginBody).at("/data/accessToken").asText();
+        return mockMvc.perform(get(CUSTOMS_STATUS_PATH, orderId)
+                .header(HttpHeaders.AUTHORIZATION, SellerTestSupport.BEARER_PREFIX + token));
     }
 
     private long createOrder(String token, String internationalTrackingNumber) throws Exception {
@@ -171,7 +154,7 @@ class CustomsApiTest {
         body.put("localShippingFeeJpy", 800);
         body.put("internationalTrackingNumber", internationalTrackingNumber);
         String response = mockMvc.perform(post(ORDERS_PATH)
-                        .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token)
+                        .header(HttpHeaders.AUTHORIZATION, SellerTestSupport.BEARER_PREFIX + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
