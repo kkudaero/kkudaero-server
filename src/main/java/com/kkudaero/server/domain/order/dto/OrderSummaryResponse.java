@@ -20,6 +20,8 @@ public record OrderSummaryResponse(
         String maskedPersonalCustomsCode,
         @Schema(description = "국제 운송장번호", nullable = true) String internationalTrackingNumber,
         @Schema(description = "진행 상태") OrderStatus status,
+        @Schema(description = "자동 조회로 마지막에 확인한 통관 상태. 관세청이 준 값 그대로입니다.", nullable = true)
+        String customsStatus,
         @Schema(description = "마지막 수정 시각(UTC)") Instant updatedAt
 ) {
 
@@ -35,6 +37,7 @@ public record OrderSummaryResponse(
                 personalCustomsCode == null ? null : MaskingUtil.maskPersonalCustomsCode(personalCustomsCode),
                 order.getInternationalTrackingNumber(),
                 order.getStatus(),
+                order.getCustomsStatus(),
                 order.getUpdatedAt()
         );
     }

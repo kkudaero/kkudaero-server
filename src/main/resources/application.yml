@@ -23,6 +23,10 @@ springdoc:
 kkudaero:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  customs:
+    poll-interval: PT30M
+    poll-initial-delay: PT1M
+    poll-max-order-age: P90D
   encryption:
     key: ${PERSONAL_DATA_ENCRYPTION_KEY}
   exchange:
