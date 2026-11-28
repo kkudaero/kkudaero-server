@@ -28,7 +28,9 @@
 
 ## 관부가세·마진 예상 계산
 
-`POST /api/v1/duty-estimates`에 물품 금액, 배송비, 환율, 관세율, 판매가를 보내면 목록통관 여부와 합산과세 위험, 예상 관부가세와 마진을 돌려줍니다. 환율과 관세율은 셀러가 넣은 값을 쓰고, 결과는 언제나 예상치입니다. 계산 방식은 [docs/decisions/0002-duty-estimate-calculation.md](docs/decisions/0002-duty-estimate-calculation.md)에 있습니다.
+`POST /api/v1/duty-estimates`에 물품 금액, 배송비, 관세율, 판매가를 보내면 목록통관 여부와 합산과세 위험, 예상 관부가세와 마진을 돌려줍니다. 결과는 언제나 예상치입니다. 계산 방식은 [docs/decisions/0002-duty-estimate-calculation.md](docs/decisions/0002-duty-estimate-calculation.md)에 있습니다.
+
+환율을 비우면 관세청 과세환율을 조회해 씁니다. 조회하려면 공공데이터포털에서 `관세청_관세환율정보(GW)` 활용 신청을 하고, 일반 인증키(Decoding)를 `CUSTOMS_EXCHANGE_SERVICE_KEY` 환경변수나 `application-local.yml`의 `kkudaero.exchange.service-key`에 넣습니다. 키가 없으면 환율을 직접 넣은 요청만 계산됩니다. 배경은 [docs/decisions/0003-customs-exchange-rate.md](docs/decisions/0003-customs-exchange-rate.md)에 있습니다.
 
 ## 빌드 확인
 
