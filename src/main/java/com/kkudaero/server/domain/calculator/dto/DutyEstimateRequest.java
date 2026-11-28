@@ -2,7 +2,9 @@ package com.kkudaero.server.domain.calculator.dto;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
@@ -31,12 +33,12 @@ public record DutyEstimateRequest(
         @Digits(integer = PERCENT_INTEGER_DIGITS, fraction = PERCENT_FRACTION_DIGITS)
         BigDecimal dutyRatePercent,
 
-        @Schema(description = "1엔당 원화 환율", example = "9.2")
-        @NotNull @Positive @Digits(integer = RATE_INTEGER_DIGITS, fraction = RATE_FRACTION_DIGITS)
+        @Schema(description = "1엔당 원화 환율. 달러 환율과 함께 비우면 관세청 과세환율을 씁니다.", example = "9.2")
+        @Positive @Digits(integer = RATE_INTEGER_DIGITS, fraction = RATE_FRACTION_DIGITS)
         BigDecimal jpyToKrwRate,
 
-        @Schema(description = "1달러당 원화 환율", example = "1380")
-        @NotNull @Positive @Digits(integer = RATE_INTEGER_DIGITS, fraction = RATE_FRACTION_DIGITS)
+        @Schema(description = "1달러당 원화 환율. 엔 환율과 함께 비우면 관세청 과세환율을 씁니다.", example = "1380")
+        @Positive @Digits(integer = RATE_INTEGER_DIGITS, fraction = RATE_FRACTION_DIGITS)
         BigDecimal usdToKrwRate,
 
         @Schema(description = "고객에게 받는 판매가(원)", example = "250000")
@@ -52,6 +54,17 @@ public record DutyEstimateRequest(
         @NotNull
         Boolean isTaxPaidBySeller
 ) {
+
+    @JsonIgnore
+    @Schema(hidden = true)
+    @AssertTrue(message = "엔 환율과 달러 환율은 둘 다 넣거나 둘 다 비워야 합니다")
+    public boolean isExchangeRatePairValid() {
+        return (jpyToKrwRate == null) == (usdToKrwRate == null);
+    }
+
+    public boolean hasExchangeRates() {
+        return jpyToKrwRate != null && usdToKrwRate != null;
+    }
 
     private static final int AMOUNT_INTEGER_DIGITS = 10;
     private static final int RATE_INTEGER_DIGITS = 5;
