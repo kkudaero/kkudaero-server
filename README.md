@@ -11,7 +11,8 @@
 
 1. `src/main/resources/application-local.example.yml`을 같은 폴더에 `application-local.yml`로 복사하고 DB 접속 정보를 채웁니다. 이 파일은 git에서 제외됩니다.
 2. `kkudaero.jwt.secret`에 Base64로 인코딩한 32바이트 이상의 값을 넣습니다. `openssl rand -base64 32`로 만들 수 있습니다.
-3. 서버를 실행합니다.
+3. `kkudaero.encryption.key`에 Base64로 인코딩한 32바이트 값을 넣습니다. 같은 명령으로 만들되 JWT 시크릿과 다른 값을 씁니다.
+4. 서버를 실행합니다.
 
 ```bash
 ./gradlew bootRun --args='--spring.profiles.active=local'
@@ -20,11 +21,15 @@
 - API 문서: http://localhost:8080/swagger-ui.html
 - OpenAPI 명세: http://localhost:8080/v3/api-docs
 
-`application-local.yml` 없이 실행하려면 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` 환경변수를 줍니다.
+`application-local.yml` 없이 실행하려면 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `PERSONAL_DATA_ENCRYPTION_KEY` 환경변수를 줍니다.
 
 ## 인증
 
 `POST /api/v1/sellers`로 가입하고 `POST /api/v1/sellers/login`으로 받은 `accessToken`을 `Authorization: Bearer <토큰>` 헤더에 넣습니다. 결정 배경은 [docs/decisions/0001-seller-authentication.md](docs/decisions/0001-seller-authentication.md)에 있습니다.
+
+## 개인정보 암호화
+
+개인통관고유부호, 이름, 주소, 전화번호 컬럼에는 `@Convert(converter = EncryptedStringConverter.class)`를 붙여 암호화해서 저장합니다. 로그에 꼭 남겨야 하면 `MaskingUtil`로 가립니다. 암호화 키를 잃으면 저장된 값을 복구할 수 없습니다. 배경은 [docs/decisions/0004-personal-data-encryption.md](docs/decisions/0004-personal-data-encryption.md)에 있습니다.
 
 ## 관부가세·마진 예상 계산
 
