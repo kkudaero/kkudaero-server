@@ -49,6 +49,10 @@
 
 `GET /api/v1/orders/{orderId}/customs-status`는 주문의 국제 운송장번호로 관세청 화물통관 진행정보를 조회합니다. 조회하려면 UNIPASS에서 화물통관진행정보조회 OpenAPI 인증키를 받아 `UNIPASS_API_KEY` 환경변수나 `application-local.yml`의 `kkudaero.unipass.api-key`에 넣습니다. 키가 없으면 503을 돌려줍니다. 배경은 [docs/decisions/0006-customs-status.md](docs/decisions/0006-customs-status.md)에 있습니다.
 
+## 통관 자동 조회와 알림
+
+국제 운송장번호가 있고 끝나지 않은 주문의 통관 상태를 30분마다 조회합니다. 상태가 바뀌면 알림을 한 번 만들고, `GET /api/v1/notifications`로 확인해 `PATCH /api/v1/notifications/{notificationId}`로 읽음 표시합니다. 주기는 `kkudaero.customs.poll-interval`로 바꿉니다. 메일과 푸시는 보내지 않습니다. 배경은 [docs/decisions/0008-customs-notification.md](docs/decisions/0008-customs-notification.md)에 있습니다.
+
 ## 빌드 확인
 
 ```bash
