@@ -31,6 +31,10 @@
 
 개인통관고유부호, 이름, 주소, 전화번호 컬럼에는 `@Convert(converter = EncryptedStringConverter.class)`를 붙여 암호화해서 저장합니다. 로그에 꼭 남겨야 하면 `MaskingUtil`로 가립니다. 암호화 키를 잃으면 저장된 값을 복구할 수 없습니다. 배경은 [docs/decisions/0004-personal-data-encryption.md](docs/decisions/0004-personal-data-encryption.md)에 있습니다.
 
+## 시작 체크리스트
+
+`GET /api/v1/checklist-steps`는 구매대행 시작 준비 5단계와 내가 완료한 단계를 돌려주고, `PATCH /api/v1/checklist-steps/{step}`은 단계를 완료로 표시하거나 되돌립니다. 배경은 [docs/decisions/0007-checklist.md](docs/decisions/0007-checklist.md)에 있습니다.
+
 ## 관부가세·마진 예상 계산
 
 `POST /api/v1/duty-estimates`에 물품 금액, 배송비, 관세율, 판매가를 보내면 목록통관 여부와 합산과세 위험, 예상 관부가세와 마진을 돌려줍니다. 결과는 언제나 예상치입니다. 계산 방식은 [docs/decisions/0002-duty-estimate-calculation.md](docs/decisions/0002-duty-estimate-calculation.md)에 있습니다.
