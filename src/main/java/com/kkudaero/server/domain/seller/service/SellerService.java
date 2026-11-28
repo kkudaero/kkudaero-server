@@ -2,6 +2,9 @@ package com.kkudaero.server.domain.seller.service;
 
 import java.util.Locale;
 
+import com.kkudaero.server.domain.checklist.repository.ChecklistCompletionRepository;
+import com.kkudaero.server.domain.notification.repository.NotificationRepository;
+import com.kkudaero.server.domain.order.repository.OrderRepository;
 import com.kkudaero.server.domain.seller.dto.LoginRequest;
 import com.kkudaero.server.domain.seller.dto.LoginResponse;
 import com.kkudaero.server.domain.seller.dto.SellerResponse;
@@ -21,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class SellerService {
 
     private final SellerRepository sellerRepository;
+    private final OrderRepository orderRepository;
+    private final NotificationRepository notificationRepository;
+    private final ChecklistCompletionRepository checklistCompletionRepository;
     private final PasswordEncoder passwordEncoder;
     private final AccessTokenIssuer accessTokenIssuer;
 
@@ -49,6 +55,20 @@ public class SellerService {
         return sellerRepository.findById(sellerId)
                 .map(SellerResponse::from)
                 .orElseThrow(() -> new BusinessException(SellerErrorCode.SELLER_NOT_FOUND));
+    }
+
+    @Transactional
+    public void deleteSeller(Long sellerId, String password) {
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new BusinessException(SellerErrorCode.SELLER_NOT_FOUND));
+        if (!passwordEncoder.matches(password, seller.getPasswordHash())) {
+            throw new BusinessException(SellerErrorCode.SELLER_PASSWORD_MISMATCH);
+        }
+
+        notificationRepository.deleteAllBySellerId(sellerId);
+        checklistCompletionRepository.deleteAllBySellerId(sellerId);
+        orderRepository.deleteAllBySellerId(sellerId);
+        sellerRepository.deleteById(sellerId);
     }
 
     private String normalizeEmail(String email) {
