@@ -23,6 +23,8 @@ springdoc:
 kkudaero:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  encryption:
+    key: ${PERSONAL_DATA_ENCRYPTION_KEY}
   exchange:
     url: https://apis.data.go.kr/1220000/retrieveTrifFxrtInfo/getRetrieveTrifFxrtInfo
     service-key: ${CUSTOMS_EXCHANGE_SERVICE_KEY:}

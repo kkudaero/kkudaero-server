@@ -5,5 +5,7 @@ spring:
     password:
 
 kkudaero:
+  encryption:
+    key: dGVzdC1vbmx5LWVuY3J5cHRpb24ta2V5LTMyYnl0ZXM=
   jwt:
     secret: dGVzdC1vbmx5LWp3dC1zZWNyZXQtbm90LWZvci1wcm9kdWN0aW9uLXVzZQ==
