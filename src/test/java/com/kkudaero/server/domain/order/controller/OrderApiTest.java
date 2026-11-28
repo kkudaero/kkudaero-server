@@ -15,6 +15,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kkudaero.server.domain.order.error.OrderErrorCode;
 import com.kkudaero.server.global.error.GlobalErrorCode;
+import com.kkudaero.server.support.SellerTestSupport;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,13 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class OrderApiTest {
 
-    private static final String SELLERS_PATH = "/api/v1/sellers";
-    private static final String LOGIN_PATH = "/api/v1/sellers/login";
     private static final String ORDERS_PATH = "/api/v1/orders";
     private static final String ORDER_PATH = "/api/v1/orders/{orderId}";
     private static final String ORDER_STATUS_PATH = "/api/v1/orders/{orderId}/status";
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final String PASSWORD = "password-1234";
     private static final String RECIPIENT_NAME = "홍길동";
     private static final String PERSONAL_CUSTOMS_CODE = "P123456789012";
     private static final String MASKED_PERSONAL_CUSTOMS_CODE = "P**********12";
@@ -65,8 +62,8 @@ class OrderApiTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        accessToken = signUpAndLogin("seller@example.com");
-        otherAccessToken = signUpAndLogin("other@example.com");
+        accessToken = SellerTestSupport.signUpAndLogin(mockMvc, objectMapper, "seller@example.com");
+        otherAccessToken = SellerTestSupport.signUpAndLogin(mockMvc, objectMapper, "other@example.com");
     }
 
     @Test
@@ -247,19 +244,6 @@ class OrderApiTest {
                 .andExpect(jsonPath("$.code").value(GlobalErrorCode.UNAUTHORIZED.name()));
     }
 
-    private String signUpAndLogin(String email) throws Exception {
-        String credentials = objectMapper.writeValueAsString(Map.of("email", email, "password", PASSWORD));
-        mockMvc.perform(post(SELLERS_PATH).contentType(MediaType.APPLICATION_JSON).content(credentials))
-                .andExpect(status().isCreated());
-        String loginBody = mockMvc.perform(
-                        post(LOGIN_PATH).contentType(MediaType.APPLICATION_JSON).content(credentials))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        return objectMapper.readTree(loginBody).at("/data/accessToken").asText();
-    }
-
     private ResultActions createOrder(String token, Map<String, Object> body) throws Exception {
         return perform(post(ORDERS_PATH), token, body);
     }
@@ -278,7 +262,7 @@ class OrderApiTest {
     }
 
     private ResultActions perform(MockHttpServletRequestBuilder request, String token) throws Exception {
-        return mockMvc.perform(request.header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token));
+        return mockMvc.perform(request.header(HttpHeaders.AUTHORIZATION, SellerTestSupport.BEARER_PREFIX + token));
     }
 
     private ResultActions perform(

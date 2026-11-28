@@ -5,6 +5,8 @@ spring:
     password:
 
 kkudaero:
+  customs:
+    poll-initial-delay: P1D
   encryption:
     key: dGVzdC1vbmx5LWVuY3J5cHRpb24ta2V5LTMyYnl0ZXM=
   jwt:

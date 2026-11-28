@@ -21,6 +21,9 @@ public record OrderResponse(
         @Schema(description = "국제 운송장번호", nullable = true) String internationalTrackingNumber,
         @Schema(description = "진행 상태") OrderStatus status,
         @Schema(description = "메모", nullable = true) String memo,
+        @Schema(description = "자동 조회로 마지막에 확인한 통관 상태. 관세청이 준 값 그대로입니다.", nullable = true)
+        String customsStatus,
+        @Schema(description = "통관 상태를 마지막으로 확인한 시각(UTC)", nullable = true) Instant customsCheckedAt,
         @Schema(description = "등록 시각(UTC)") Instant createdAt,
         @Schema(description = "마지막 수정 시각(UTC)") Instant updatedAt
 ) {
@@ -39,6 +42,8 @@ public record OrderResponse(
                 order.getInternationalTrackingNumber(),
                 order.getStatus(),
                 order.getMemo(),
+                order.getCustomsStatus(),
+                order.getCustomsCheckedAt(),
                 order.getCreatedAt(),
                 order.getUpdatedAt()
         );

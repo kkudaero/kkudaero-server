@@ -1,7 +1,9 @@
 package com.kkudaero.server.domain.order.entity;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Objects;
 
 import com.kkudaero.server.global.entity.BaseTimeEntity;
 import com.kkudaero.server.global.util.EncryptedStringConverter;
@@ -33,6 +35,7 @@ public class Order extends BaseTimeEntity {
 
     private static final int ENCRYPTED_COLUMN_LENGTH = 512;
     private static final int STATUS_MAX_LENGTH = 30;
+    private static final int CUSTOMS_STATUS_MAX_LENGTH = 200;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,6 +80,11 @@ public class Order extends BaseTimeEntity {
     @Column(length = MEMO_MAX_LENGTH)
     private String memo;
 
+    @Column(length = CUSTOMS_STATUS_MAX_LENGTH)
+    private String customsStatus;
+
+    private Instant customsCheckedAt;
+
     private Order(Long sellerId, OrderDetails details) {
         this.sellerId = sellerId;
         this.status = OrderStatus.RECEIVED;
@@ -96,11 +104,22 @@ public class Order extends BaseTimeEntity {
         this.recipientName = details.recipientName();
         this.personalCustomsCode = details.personalCustomsCode();
         this.localTrackingNumber = details.localTrackingNumber();
+        if (!Objects.equals(this.internationalTrackingNumber, details.internationalTrackingNumber())) {
+            this.customsStatus = null;
+            this.customsCheckedAt = null;
+        }
         this.internationalTrackingNumber = details.internationalTrackingNumber();
         this.memo = details.memo();
     }
 
     public void updateStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public boolean updateCustomsStatus(String customsStatus, Instant checkedAt) {
+        boolean isChanged = !customsStatus.equals(this.customsStatus);
+        this.customsStatus = customsStatus;
+        this.customsCheckedAt = checkedAt;
+        return isChanged;
     }
 }
