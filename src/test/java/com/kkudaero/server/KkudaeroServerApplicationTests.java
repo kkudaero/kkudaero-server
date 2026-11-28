@@ -31,6 +31,8 @@ class KkudaeroServerApplicationTests {
                 .andExpect(jsonPath("$.paths['/api/v1/orders'].post.summary").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{orderId}/status'].patch.summary").exists())
                 .andExpect(jsonPath("$.paths['/api/v1/orders/{orderId}/customs-status'].get.summary").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/checklist-steps/{step}'].patch.summary").exists())
+                .andExpect(jsonPath("$.components.schemas.ChecklistStepResponse.properties.isCompleted").exists())
                 .andExpect(jsonPath("$.components.schemas.DutyEstimateRequest.properties.usdToKrwRate").exists())
                 .andExpect(jsonPath("$.components.schemas.DutyEstimateRequest.properties.exchangeRatePairValid")
                         .doesNotExist())
