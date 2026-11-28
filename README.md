@@ -27,6 +27,10 @@
 
 `POST /api/v1/sellers`로 가입하고 `POST /api/v1/sellers/login`으로 받은 `accessToken`을 `Authorization: Bearer <토큰>` 헤더에 넣습니다. 결정 배경은 [docs/decisions/0001-seller-authentication.md](docs/decisions/0001-seller-authentication.md)에 있습니다.
 
+## 탈퇴
+
+`POST /api/v1/sellers/me/withdrawal`에 현재 비밀번호를 보내면 계정과 주문, 알림, 체크리스트 기록을 모두 지웁니다. 되돌릴 수 없고, 이미 받은 토큰은 401이 됩니다. 셀러 데이터를 담는 테이블을 새로 만들면 `SellerService.deleteSeller`에서 함께 지워야 합니다. 배경은 [docs/decisions/0009-seller-withdrawal.md](docs/decisions/0009-seller-withdrawal.md)에 있습니다.
+
 ## 개인정보 암호화
 
 개인통관고유부호, 이름, 주소, 전화번호 컬럼에는 `@Convert(converter = EncryptedStringConverter.class)`를 붙여 암호화해서 저장합니다. 로그에 꼭 남겨야 하면 `MaskingUtil`로 가립니다. 암호화 키를 잃으면 저장된 값을 복구할 수 없습니다. 배경은 [docs/decisions/0004-personal-data-encryption.md](docs/decisions/0004-personal-data-encryption.md)에 있습니다.
