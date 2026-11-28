@@ -26,6 +26,10 @@
 
 `POST /api/v1/sellers`로 가입하고 `POST /api/v1/sellers/login`으로 받은 `accessToken`을 `Authorization: Bearer <토큰>` 헤더에 넣습니다. 결정 배경은 [docs/decisions/0001-seller-authentication.md](docs/decisions/0001-seller-authentication.md)에 있습니다.
 
+## 관부가세·마진 예상 계산
+
+`POST /api/v1/duty-estimates`에 물품 금액, 배송비, 환율, 관세율, 판매가를 보내면 목록통관 여부와 합산과세 위험, 예상 관부가세와 마진을 돌려줍니다. 환율과 관세율은 셀러가 넣은 값을 쓰고, 결과는 언제나 예상치입니다. 계산 방식은 [docs/decisions/0002-duty-estimate-calculation.md](docs/decisions/0002-duty-estimate-calculation.md)에 있습니다.
+
 ## 빌드 확인
 
 ```bash
